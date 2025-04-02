@@ -1,0 +1,30 @@
+node_modules/
+dist/
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Directorios de compilación
+out/
+build/
+
+# Archivos de Jest
+jest-cache/
+jest-debug.log
+
+# Configuración del editor
+.vscode/
+.idea/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos de entorno
+.env
+.env.local
+.env.*.local
