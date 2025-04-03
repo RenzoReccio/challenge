@@ -9,61 +9,119 @@ export class Item {
         this.quality = quality;
     }
 }
+interface UpdatableItem {
+    update(): void;
+}
 
-export class GildedRose {
-    items: Array<Item>;
+class NormalItem implements UpdatableItem {
+    constructor(protected item: Item) {}
 
-    constructor(items = [] as Array<Item>) {
-        this.items = items;
+    update(): void {
+        this.decreaseQuality();
+        this.item.sellIn--;
+
+        if (this.item.sellIn < 0) {
+            this.decreaseQuality();
+        }
     }
 
-    updateQuality() {
-        for (let i = 0; i < this.items.length; i++) {
-            if (this.items[i].name != 'Aged Brie' && this.items[i].name != 'Backstage passes to a TAFKAL80ETC concert') {
-                if (this.items[i].quality > 0) {
-                    if (this.items[i].name != 'Sulfuras, Hand of Ragnaros') {
-                        this.items[i].quality = this.items[i].quality - 1
-                    }
-                }
-            } else {
-                if (this.items[i].quality < 50) {
-                    this.items[i].quality = this.items[i].quality + 1
-                    if (this.items[i].name == 'Backstage passes to a TAFKAL80ETC concert') {
-                        if (this.items[i].sellIn < 11) {
-                            if (this.items[i].quality < 50) {
-                                this.items[i].quality = this.items[i].quality + 1
-                            }
-                        }
-                        if (this.items[i].sellIn < 6) {
-                            if (this.items[i].quality < 50) {
-                                this.items[i].quality = this.items[i].quality + 1
-                            }
-                        }
-                    }
-                }
-            }
-            if (this.items[i].name != 'Sulfuras, Hand of Ragnaros') {
-                this.items[i].sellIn = this.items[i].sellIn - 1;
-            }
-            if (this.items[i].sellIn < 0) {
-                if (this.items[i].name != 'Aged Brie') {
-                    if (this.items[i].name != 'Backstage passes to a TAFKAL80ETC concert') {
-                        if (this.items[i].quality > 0) {
-                            if (this.items[i].name != 'Sulfuras, Hand of Ragnaros') {
-                                this.items[i].quality = this.items[i].quality - 1
-                            }
-                        }
-                    } else {
-                        this.items[i].quality = this.items[i].quality - this.items[i].quality
-                    }
-                } else {
-                    if (this.items[i].quality < 50) {
-                        this.items[i].quality = this.items[i].quality + 1
-                    }
-                }
-            }
+    protected decreaseQuality(): void {
+        if (this.item.quality > 0) {
+            this.item.quality--;
+        }
+    }
+
+    protected increaseQuality(): void {
+        if (this.item.quality < 50) {
+            this.item.quality++;
+        }
+    }
+}
+
+
+class AgedBrie extends NormalItem {
+    update(): void {
+        this.increaseQuality();
+        this.item.sellIn--;
+
+        if (this.item.sellIn < 0) {
+            this.increaseQuality();
+        }
+    }
+
+    increaseQuality(): void {
+        if (this.item.quality < 50) {
+            this.item.quality++;
+        }
+    }
+}
+
+class Sulfuras implements UpdatableItem {
+    constructor(private item: Item) {}
+
+    update(): void {
+       
+    }
+}
+
+class BackstagePasses extends NormalItem {
+    update(): void {
+        this.increaseQuality();
+
+        if (this.item.sellIn < 11) {
+            this.increaseQuality();
+        }
+        if (this.item.sellIn < 6) {
+            this.increaseQuality();
         }
 
+        this.item.sellIn--;
+
+        if (this.item.sellIn < 0) {
+            this.item.quality = 0;
+        }
+    }
+}
+
+class ConjuredItem extends NormalItem {
+    update(): void {
+        this.decreaseQuality();
+        this.decreaseQuality();
+        this.item.sellIn--;
+
+        if (this.item.sellIn < 0) {
+            this.decreaseQuality();
+            this.decreaseQuality();
+        }
+    }
+}
+
+export class GildedRose {
+    items: Item[];
+    private updatableItems: UpdatableItem[];
+
+    constructor(items: Item[]) {
+        this.items = items;
+        this.updatableItems = items.map(GildedRose.createUpdatableItem);
+    }
+
+    private static createUpdatableItem(item: Item): UpdatableItem {
+        switch (item.name) {
+            case 'Aged Brie':
+                return new AgedBrie(item);
+            case 'Sulfuras, Hand of Ragnaros':
+                return new Sulfuras(item);
+            case 'Backstage passes to a TAFKAL80ETC concert':
+                return new BackstagePasses(item);
+            case 'Conjured':
+                return new ConjuredItem(item);
+            default:
+                return new NormalItem(item);
+        }
+    }
+
+    updateQuality(): Item[] {
+        this.updatableItems.forEach(item => item.update());
         return this.items;
     }
 }
