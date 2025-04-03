@@ -5,6 +5,10 @@ Let M be a not empty set of integer numbers, find the first subset of 2 numbers 
 ## Challenge
 You're required to create a function that receives an array (M) and integer value (N). This function has to return an array of the first possible solution.
 
+## Run Test
+```sh
+npm run test
+```
 
 > 🚨 We're looking to someone who can imagine future problems while is coding.
 
